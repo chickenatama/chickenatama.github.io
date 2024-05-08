@@ -5,18 +5,30 @@
 <BODY>
 <H1>2024/05/08のメモ</H1>
 
-<a href="https://chipyard.readthedocs.io/en/stable/Chipyard-Basics/Initial-Repo-Setup.html/">Chipyardのセットアップ</a>をしていたところ、
-build-setup.shのstep-9でエラー終了した。<br>
-<pre><code class="language-bash">
-    ./build-setup.sh riscv-tools
-    FileNotFoundError: [Errno 2] No such file or directory: 'guestmount'
+    <a href="https://chipyard.readthedocs.io/en/stable/Chipyard-Basics/Initial-Repo-Setup.html/">Chipyardのセットアップ</a>をしていたところ、
+    build-setup.shのstep-9でエラー終了した。<br>
+    <pre><code class="language-bash">
+    $ ./build-setup.sh riscv-tools
+    > FileNotFoundError: [Errno 2] No such file or directory: 'guestmount'
+    > ERROR: Failed to build workload br-base.json
+    > Log available at: xxx/chipyard/software/firemarshal/logs/br-base-build-2024-05-08--02-13-00-TV0XIP9CV73HRC7V.log
+    > ERROR: FAILURE: 1 builds failed
+    > build-setup.sh: Build script failed with exit code 1 at step 9: Pre-compiling FireMarshal buildroot sources
+    </code></pre><BR>
+    検索してたら出てきた<a href="https://github.com/firesim/FireMarshal/issues/30">これ</a>を試したが、変わらず。<br>
+    <pre><code class="language-bash">
+    $ sudo chmod +r /boot/vmlinuz-*
+    </code></pre><br>
+    そもそも、前提ツールが足りなかったらしい。以下試したところ正常終了となった。
+    <pre><code class="language-bash">
+    $ sudo apt install -y libguestfs-tools
+    </code></pre><br>
+    
 
-> ERROR: Failed to build workload br-base.json
-> Log available at: xxx/chipyard/software/firemarshal/logs/br-base-build-2024-05-08--02-13-00-TV0XIP9CV73HRC7V.log
-> ERROR: FAILURE: 1 builds failed
-> build-setup.sh: Build script failed with exit code 1 at step 9: Pre-compiling FireMarshal buildroot sources
-</code></pre><BR>
-  <a href="https://chickenatama.github.io/index.html">index</a><BR>
+    
+    
+
+    <a href="https://chickenatama.github.io/index.html">index</a><BR>
 
 </BODY>
 </HTML>
