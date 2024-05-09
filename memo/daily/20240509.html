@@ -70,7 +70,21 @@
     common.mkから次の行を探し、"-XX:MaxPermSize=256M"を削除してみる。<br>
     FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(FIRRTL_JAR) firrtl.Driver<br>
     これで、ようやくmake -f Makefile.e300artydevkit verilogが通るようになった。<br>
-    明日は何をやればビルドできるようになるのか、もう少しまとめてみようと思う。
+    明日は何をやればビルドできるようになるのか、もう少しまとめてみようと思う。<br>
+
+    もう、今度は何だよ...
+    <pre><code>
+        xxx@xxxxx:~/freedom$ make -j8 -f Makefile.e300artydevkit mcs
+        > make -C /home/xxx/freedom/bootrom/xip romgen
+        > make[1]: Entering directory '/home/xxx/clone/freedom/bootrom/xip'
+        
+        > Traceback (most recent call last):
+        >   File "/home/xxx/clone/freedom/rocket-chip/scripts/vlsi_rom_gen", line 90, in iterate_by_n
+        >   batch += (next(it),)
+        > StopIteration
+    </code></pre><br>
+    <a href="https://github.com/sifive/freedom/issues/172">既知のバグなら直しといてくれよ</a><br>
+    そして、やり直したらなんか"module 'BootROM' not found"とかよくわからないことを言われたが、make cleanしてもう一度やり直したら通り、無事bitstreamの生成まで辿り着いた。
                                                             
     
 
