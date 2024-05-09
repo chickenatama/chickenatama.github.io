@@ -1,0 +1,43 @@
+<HTML>
+<HEAD>
+<TITLE>2024/05/09のメモ</TITLE>
+</HEAD>
+<BODY>
+<H1>2024/05/09のメモ</H1>
+    Verilogでソースコードを読めることにこだわらなくても、gtkwaveで波形など読めれば当面の用は足せるので、Freedomなど有名なものを扱ってみることにした。(サポート終了しているのが懸念点だが)<br>
+    <a href="https://github.com/sifive/freedom?tab=readme-ov-file">Freedom</a>のgit cloneを試すと、timeoutとなってしまった。
+    <pre><code class="language-bash">
+    > Cloning into '/home/xxx/clone/freedom/rocket-chip/riscv-tools/riscv-gnu-toolchain/riscv-qemu'...
+    > fatal: unable to connect to github.com:
+    > github.com[0: 20.27.177.113]: errno=Connection timed out
+    </code></pre><BR>
+    以下を実行。<br>
+    <pre><code class="language-bash">
+    $ git config --global url."https://".insteadOf git://
+    </code></pre><br>
+    また、repository not foundとなるエラーも発生したので、<a href="https://github.com/sifive/freedom/issues/66">issue</a>を確認し、~/.gitconfigに以下を追記した。
+    <pre><code>
+    [url "https://git.qemu.org/git"]
+        insteadOf = https://git.qemu-project.org
+
+    [url "https://git.qemu.org/git"]
+        insteadOf = git://git.qemu-project.org
+    
+    [url "https://github.com/"]
+        insteadOf = git://github.com/
+    
+    [url "https://github.com/"]
+        insteadOf = git@github.com:
+    
+    [url "https://anongit.freedesktop.org/git"]
+        insteadOf = git://anongit.freedesktop.org
+    </code></pre><br>
+    
+
+    
+    
+
+    <a href="https://chickenatama.github.io/index.html">index</a><BR>
+
+</BODY>
+</HTML>
