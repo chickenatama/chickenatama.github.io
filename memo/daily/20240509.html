@@ -5,7 +5,7 @@
 <BODY>
 <H1>2024/05/09のメモ</H1>
     Verilogでソースコードを読めることにこだわらなくても、gtkwaveで波形など読めれば当面の用は足せるので、Freedomなど有名なものを扱ってみることにした。(サポート終了しているのが懸念点だが)<br>
-    <a href="https://github.com/sifive/freedom?tab=readme-ov-file">Freedom</a>のgit cloneを試すと、timeoutとなってしまった。
+    <a href="https://github.com/sifive/freedom?tab=readme-ov-file">Freedom</a>のgit cloneを試すと、submoduleのupdateでtimeoutとなってしまった。
     <pre><code class="language-bash">
     > Cloning into '/home/xxx/clone/freedom/rocket-chip/riscv-tools/riscv-gnu-toolchain/riscv-qemu'...
     > fatal: unable to connect to github.com:
@@ -32,6 +32,42 @@
     [url "https://anongit.freedesktop.org/git"]
         insteadOf = git://anongit.freedesktop.org
     </code></pre><br>
+
+    freedomのレポジトリで、"make -f Makefile.e300artydevkit verilog"を実行するも、大量のエラーが出る。どうやら、レポジトリが見つからない？<br>
+    以下を試してみた。<br>
+    <pre><code>
+        create file named "respository", and copy the following content into it:
+        [repositories]
+        local
+        aliyun: http://maven.aliyun.com/nexus/content/groups/public/
+        sbt-plugins-repo: http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/artifact.[ext]
+        typesafe-sbt-plugins: http://dl.bintray.com/sbt/sbt-plugin-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/artifact.[ext], bootOnly
+        central: http://repo1.maven.org/maven2/
+        
+        add "-Dsbt.override.build.repos=true" into file "/usr/share/sbt/conf/sbtopts". This is the key steps to make the flow use the new created repository.   
+    </code></pre><br>
+    続く、run "sbt compile" under rocket-chipであえなく同様のエラーが多発。<br>
+    <a href="https://github.com/chipsalliance/rocket-chip/issues/1385">このissueの記述</a>を参考に、先に<br>
+    4.under rocket-chip/firrtl, run:<br>
+    sbt publishLocal<br> #ここまでは通った
+    sbt compile<br>
+    を試してみる。<br>
+    よくわかんなくなってきたので、freedomのmakeに戻ったところ、以下エラーで怒られる。<br>
+    <pre>
+    [error] insecure HTTP request is unsupported 'http://download.eclipse.org/jgit/maven'; switch to HTTPS or opt-in as ("jgit-repo" at "http://download.eclipse.org/jgit/maven").withAllowInsecureProtocol(true), or by using allowInsecureProtocol in repositories file
+    </pre><br>
+    ~/clone/freedom/rocket-chip/projectのplugins.sbtを以下の部分変更。(http->httpsにした)
+    <pre><code>
+        jgit-repo: https://download.eclipse.org/jgit/maven
+    </code></pre><br>
+    stackoverflowerrorが大量に出る。scala 2.12.4の問題の気がしたので、build.sbtとrocketchip/build.sbtのscalaのバージョンを2.12.19に書き換えてみた。<br>
+    stackoverflowerrorは消えたが、Note: Unresolved dependencies path:<br>
+    [error] sbt.librarymanagement.ResolveException: Error downloading org.scalamacros:paradise_2.12.19:2.1.0<br>
+    いつになったら全てのエラーを消せるんだ。どうやら、完全にscalaのバージョンを書き換えられてないっぽいし、2.12.19にも対応してないやつがあるのだろうか。<br>
+
+    
+    
+                                                            
     
 
     
