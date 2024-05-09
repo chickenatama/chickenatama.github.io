@@ -64,9 +64,13 @@
     stackoverflowerrorは消えたが、Note: Unresolved dependencies path:<br>
     [error] sbt.librarymanagement.ResolveException: Error downloading org.scalamacros:paradise_2.12.19:2.1.0<br>
     いつになったら全てのエラーを消せるんだ。どうやら、完全にscalaのバージョンを書き換えられてないっぽいし、2.12.19にも対応してないやつがあるのだろうか。<br>
-
-    
-    
+    notfoundの1つの<a href="https://github.com/scalamacros/paradise">これ</a>が2.12.11までの対応だったので、rocketchip/build.sbtのscalaのバージョンを2.12.11にし、paradiseのバージョンを2.1.1にした。<br>
+    rocketchip/chisel3/build.sbtにも2.11.4と2.1.0の記述が残っていて、stackoverflowとなるので、これも2.12.11と2.1.1に直しておく。<br>
+    今度は、Unrecognized VM option 'MaxPermSize=256M'というエラーが出た。新しいjavaのバージョンでは<a href="https://qiita.com/takorice/items/706dfe61010a48ea8060">このオプションが削除されたようなので</a>、<br>
+    common.mkから次の行を探し、"-XX:MaxPermSize=256M"を削除してみる。<br>
+    FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(FIRRTL_JAR) firrtl.Driver<br>
+    これで、ようやくmake -f Makefile.e300artydevkit verilogが通るようになった。<br>
+    明日は何をやればビルドできるようになるのか、もう少しまとめてみようと思う。
                                                             
     
 
