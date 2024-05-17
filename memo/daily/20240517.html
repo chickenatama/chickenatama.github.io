@@ -1,0 +1,97 @@
+<HTML>
+<HEAD>
+<TITLE>2024/05/09のメモ</TITLE>
+</HEAD>
+<BODY>
+<H1>2024/05/09のメモ</H1>
+    Verilogでソースコードを読めることにこだわらなくても、gtkwaveで波形など読めれば当面の用は足せるので、Freedomなど有名なものを扱ってみることにした。(サポート終了しているのが懸念点だが)<br>
+    <a href="https://github.com/sifive/freedom?tab=readme-ov-file">Freedom</a>のgit cloneを試すと、submoduleのupdateでtimeoutとなってしまった。
+    <pre><code class="language-bash">
+    > Cloning into '/home/xxx/clone/freedom/rocket-chip/riscv-tools/riscv-gnu-toolchain/riscv-qemu'...
+    > fatal: unable to connect to github.com:
+    > github.com[0: 20.27.177.113]: errno=Connection timed out
+    </code></pre><BR>
+    以下を実行。<br>
+    <pre><code class="language-bash">
+    $ git config --global url."https://".insteadOf git://
+    </code></pre><br>
+    また、repository not foundとなるエラーも発生したので、<a href="https://github.com/sifive/freedom/issues/66">issue</a>を確認し、~/.gitconfigに以下を追記した。
+    <pre><code>
+    [url "https://git.qemu.org/git"]
+        insteadOf = https://git.qemu-project.org
+
+    [url "https://git.qemu.org/git"]
+        insteadOf = git://git.qemu-project.org
+    
+    [url "https://github.com/"]
+        insteadOf = git://github.com/
+    
+    [url "https://github.com/"]
+        insteadOf = git@github.com:
+    
+    [url "https://anongit.freedesktop.org/git"]
+        insteadOf = git://anongit.freedesktop.org
+    </code></pre><br>
+
+    freedomのレポジトリで、"make -f Makefile.e300artydevkit verilog"を実行するも、大量のエラーが出る。どうやら、レポジトリが見つからない？<br>
+    以下を試してみた。<br>
+    <pre><code>
+        create file named "respository", and copy the following content into it:
+        [repositories]
+        local
+        aliyun: http://maven.aliyun.com/nexus/content/groups/public/
+        sbt-plugins-repo: http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/artifact.[ext]
+        typesafe-sbt-plugins: http://dl.bintray.com/sbt/sbt-plugin-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/artifact.[ext], bootOnly
+        central: http://repo1.maven.org/maven2/
+        
+        add "-Dsbt.override.build.repos=true" into file "/usr/share/sbt/conf/sbtopts". This is the key steps to make the flow use the new created repository.   
+    </code></pre><br>
+    続く、run "sbt compile" under rocket-chipであえなく同様のエラーが多発。<br>
+    <a href="https://github.com/chipsalliance/rocket-chip/issues/1385">このissueの記述</a>を参考に、先に<br>
+    4.under rocket-chip/firrtl, run:<br>
+    sbt publishLocal<br> #ここまでは通った
+    sbt compile<br>
+    を試してみる。<br>
+    よくわかんなくなってきたので、freedomのmakeに戻ったところ、以下エラーで怒られる。<br>
+    <pre>
+    [error] insecure HTTP request is unsupported 'http://download.eclipse.org/jgit/maven'; switch to HTTPS or opt-in as ("jgit-repo" at "http://download.eclipse.org/jgit/maven").withAllowInsecureProtocol(true), or by using allowInsecureProtocol in repositories file
+    </pre><br>
+    ~/clone/freedom/rocket-chip/projectのplugins.sbtを以下の部分変更。(http->httpsにした)
+    <pre><code>
+        jgit-repo: https://download.eclipse.org/jgit/maven
+    </code></pre><br>
+    stackoverflowerrorが大量に出る。scala 2.12.4の問題の気がしたので、build.sbtとrocketchip/build.sbtのscalaのバージョンを2.12.19に書き換えてみた。<br>
+    stackoverflowerrorは消えたが、Note: Unresolved dependencies path:<br>
+    [error] sbt.librarymanagement.ResolveException: Error downloading org.scalamacros:paradise_2.12.19:2.1.0<br>
+    いつになったら全てのエラーを消せるんだ。どうやら、完全にscalaのバージョンを書き換えられてないっぽいし、2.12.19にも対応してないやつがあるのだろうか。<br>
+    notfoundの1つの<a href="https://github.com/scalamacros/paradise">これ</a>が2.12.11までの対応だったので、rocketchip/build.sbtのscalaのバージョンを2.12.11にし、paradiseのバージョンを2.1.1にした。<br>
+    rocketchip/chisel3/build.sbtにも2.11.4と2.1.0の記述が残っていて、stackoverflowとなるので、これも2.12.11と2.1.1に直しておく。<br>
+    今度は、Unrecognized VM option 'MaxPermSize=256M'というエラーが出た。新しいjavaのバージョンでは<a href="https://qiita.com/takorice/items/706dfe61010a48ea8060">このオプションが削除されたようなので</a>、<br>
+    common.mkから次の行を探し、"-XX:MaxPermSize=256M"を削除してみる。<br>
+    FIRRTL ?= java -Xmx2G -Xss8M -XX:MaxPermSize=256M -cp $(FIRRTL_JAR) firrtl.Driver<br>
+    これで、ようやくmake -f Makefile.e300artydevkit verilogが通るようになった。<br>
+    明日は何をやればビルドできるようになるのか、もう少しまとめてみようと思う。<br>
+
+    もう、今度は何だよ...<br>
+    <pre><code>
+        xxx@xxxxx:~/freedom$ make -j8 -f Makefile.e300artydevkit mcs
+        > make -C /home/xxx/freedom/bootrom/xip romgen
+        > make[1]: Entering directory '/home/xxx/clone/freedom/bootrom/xip'
+        
+        > Traceback (most recent call last):
+        >   File "/home/xxx/clone/freedom/rocket-chip/scripts/vlsi_rom_gen", line 90, in iterate_by_n
+        >   batch += (next(it),)
+        > StopIteration
+    </code></pre><br>
+    <a href="https://github.com/sifive/freedom/issues/172">既知のバグなら直しといてくれよ</a><br>
+    そして、やり直したらなんか"module 'BootROM' not found"とかよくわからないことを言われたが、make cleanしてもう一度やり直したら通り、無事bitstreamの生成まで辿り着いた。<br>
+                                                            
+    
+
+    
+    
+
+    <a href="https://chickenatama.github.io/index.html">index</a><BR>
+
+</BODY>
+</HTML>
