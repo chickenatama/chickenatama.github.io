@@ -6,6 +6,7 @@
 <H1>2024/05/17のメモ</H1>
     先日作ったfreedom coreを、artyに焼いてソフトウェアを書いてみる。<br>
     arduino ideを使って書き込むのが標準のようだが、コマンドラインで書き込めた方が後々便利なので<a href="https://www.aps-web.jp/academy/risc-v/588/">ここ</a>を参考にやってみる。
+    ※Python3.10の以降の仕様変更？かなにかで、Ubuntu 22.04だと簡単にビルドができない(Python 3.9より前を手軽にインストールできないため)ので、20.04を使うこと。今回はPython 3.8環境を使用した。<br>
     freedom-e-sdkのreadmeでは、前提のriscv-gnu-toolchain、openocd、qemuはsifiveから入手できることになっているが、ダウンロードページはもはや存在しないようだ。<br>
     仕方ないので、それぞれ個別に入手する。<br>
     riscv-gnu-toolchainはcloneのときに--recursiveはいらないと書いてあるが、makeがsubmodule cloneで止まって進まないように見え、不安になるので初めから--recursiveはつけてcloneするのが良いだろう。<br>
