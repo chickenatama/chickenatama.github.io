@@ -1,0 +1,28 @@
+<HTML>
+<HEAD>
+<TITLE>2024/05/23のメモ</TITLE>
+</HEAD>
+<BODY>
+<H1>2024/05/23のメモ</H1>
+  前回は、Freedom E300向けのソフトウェアのビルドができるようになったところで終わっていた。<br>
+  今回は、Freedom E300に実際にプログラムの書き込みを行う。<br>
+  プログラムの書き込みには<a href="https://www.olimex.com/Products/ARM/JTAG/ARM-USB-TINY-H/">Olimex JTAGケーブル</a>が必要である。<br>
+  手元のDigilent HS3 JTAGケーブルでは、どうやら信号線が足りないので難しいか？ 面倒なので、今回は購入した。<br>
+  ボードとの繋ぎ方は<a href="https://qiita.com/Kosuke_Matsui/items/d16a6687ef3d47ee4f00">ここ</a>を見ること。<br>
+  
+  さて、今回はWSLのUbuntu 20.04で作業をしているが、それにJTAGケーブルを認識させて、WSLでビルドしたプログラムをFPGAに書き込むには作業が必要である。<br>
+  まず、OpenOCDをインストールするのだが、<a href="http://nahitafu.cocolog-nifty.com/nahitafu/2024/01/post-9784e8.html">この記事の手順</a>に従う。<br>
+  OpenOCDのインストール後、usbipdコマンドをpowershellで使ってJTAGケーブルをWSLにアタッチするが、その手順は<a href="https://learn.microsoft.com/ja-jp/windows/wsl/connect-usb">こちら</a>に従う。<br>
+  すると、/dev/ttyUSB0として、ubuntuがケーブルを認識するので、前回用意したfreedom-e-sdkディレクトリで、以下のコマンドを試してみる。<br>
+  <pre><code>
+    make BSP=metal PROGRAM=hello TARGET=freedom-e310-arty clean
+    make BSP=metal PROGRAM=hello TARGET=freedom-e310-arty software
+    make BSP=metal PROGRAM=hello TARGET=freedom-e310-arty upload
+  </code></pre><br>
+  すると、Artyにmicro USBのケーブルを接続していれば、ボーレート57600で"Hello, World!"が表示されるはずである。<br>
+  シリアルモニタはWindows側で別途用意すること。
+      ああああ
+    <a href="https://chickenatama.github.io/index.html">index</a><BR>
+
+</BODY>
+</HTML>
